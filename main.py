@@ -379,8 +379,9 @@ def log_inference_audit(
 ) -> str:
     """Logs the model inference execution into the model_inference_audit table."""
     prediction_id = str(uuid.uuid4())
-    conn = get_db_connection()
+    conn = None
     try:
+        conn = get_db_connection()
         with conn:
             with conn.cursor() as cur:
                 cur.execute("SET search_path TO parkinsons, public;")
@@ -403,9 +404,10 @@ def log_inference_audit(
                     ),
                 )
     except Exception as e:
-        print(f"[Audit Warning] Failed to log inference audit: {e}")
+        print(f"[Audit Warning] Database audit logging skipped: {e}")
     finally:
-        conn.close()
+        if conn:
+            conn.close()
     return prediction_id
 
 
