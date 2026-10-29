@@ -1,0 +1,25 @@
+# Virtual environment
+.venv/
+venv/
+ENV/
+env/
+
+# PostgreSQL cluster data and logs
+.pgdata/
+*.log
+postgres.log
+
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+*.pytest_cache/
+
+# Temporary test files
+test.docx
+
+# OS metadata
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

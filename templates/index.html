@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-950 text-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parkinson's Disease Detection System | SQL Clinical Intelligence</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                        },
+                        danger: {
+                            500: '#ef4444',
+                            600: '#dc2626',
+                        },
+                        success: {
+                            500: '#10b981',
+                            600: '#059669',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col font-sans selection:bg-sky-500 selection:text-white">
+
+    <!-- Top Navigation Header -->
+    <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-sky-500/20">
+                    <i class="fa-solid fa-brain text-xl text-white"></i>
+                </div>
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <span class="font-bold text-lg text-white tracking-tight">NeuroScreen SQL</span>
+                        <span class="text-xs px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/30 font-medium">3NF Clinical ML</span>
+                    </div>
+                    <p class="text-xs text-slate-400">Parkinson's Multimodal Screening & Dynamic SQL Detection</p>
+                </div>
+            </div>
+
+            <!-- Header Status Badges & Tab Navigation -->
+            <div class="flex items-center space-x-4">
+                <nav class="hidden md:flex space-x-1 bg-slate-950/70 p-1 rounded-xl border border-slate-800 text-sm">
+                    <button onclick="switchTab('sql-tab')" id="tab-btn-sql" class="px-4 py-1.5 rounded-lg font-medium transition-all bg-sky-600 text-white shadow-sm flex items-center space-x-2">
+                        <i class="fa-solid fa-database text-xs"></i>
+                        <span>SQL Predictor</span>
+                    </button>
+                    <button onclick="switchTab('single-tab')" id="tab-btn-single" class="px-4 py-1.5 rounded-lg font-medium text-slate-400 hover:text-white transition-all flex items-center space-x-2">
+                        <i class="fa-solid fa-user-doctor text-xs"></i>
+                        <span>Single Patient</span>
+                    </button>
+                    <button onclick="switchTab('db-tab')" id="tab-btn-db" class="px-4 py-1.5 rounded-lg font-medium text-slate-400 hover:text-white transition-all flex items-center space-x-2">
+                        <i class="fa-solid fa-table-list text-xs"></i>
+                        <span>DB Inspector</span>
+                    </button>
+                    <a href="/docs" target="_blank" class="px-3 py-1.5 rounded-lg font-medium text-slate-400 hover:text-sky-400 transition-all flex items-center space-x-1.5">
+                        <i class="fa-solid fa-book-medical text-xs"></i>
+                        <span>Swagger</span>
+                    </a>
+                </nav>
+
+                <div class="hidden sm:flex items-center space-x-2 pl-2 border-l border-slate-800 text-xs">
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>
+                        Model Ready
+                    </span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- ============================================================== -->
+        <!-- TAB 1: SQL DATASET PREDICTOR (Primary) -->
+        <!-- ============================================================== -->
+        <section id="sql-tab" class="space-y-6">
+
+            <!-- Banner / Guide -->
+            <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-slate-900 to-sky-950 p-6 border border-slate-800 shadow-xl">
+                <div class="relative z-10 sm:flex sm:items-center sm:justify-between">
+                    <div>
+                        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                            <span>Dynamic SQL Dataset Ingestion & Batch Prediction</span>
+                        </h2>
+                        <p class="mt-1 text-sm text-slate-400 max-w-2xl">
+                            Provide any dataset via SQL query, SQLite database, <code class="text-sky-400 bg-sky-950/60 px-1.5 py-0.5 rounded border border-sky-800">.sql</code> dump script, or CSV. The intelligent biomarker normalization engine maps voice, motor, gait, and olfactory features automatically to screen patients for Parkinson's disease.
+                        </p>
+                    </div>
+                    <div class="mt-4 sm:mt-0 flex gap-2">
+                        <button onclick="loadSamplePreset('multimodal')" class="text-xs px-3 py-2 bg-slate-800 hover:bg-slate-700 text-sky-400 font-semibold rounded-lg border border-slate-700 flex items-center gap-1.5 transition">
+                            <i class="fa-solid fa-flask"></i> Sample Cohort (50)
+                        </button>
+                        <button onclick="loadSamplePreset('uci')" class="text-xs px-3 py-2 bg-slate-800 hover:bg-slate-700 text-amber-400 font-semibold rounded-lg border border-slate-700 flex items-center gap-1.5 transition">
+                            <i class="fa-solid fa-microphone-lines"></i> UCI Voice SQL
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input Controls Card -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
+                <!-- Source Tabs -->
+                <div class="flex flex-wrap gap-2 border-b border-slate-800 pb-4">
+                    <button onclick="setSqlInputMode('editor')" id="mode-btn-editor" class="text-xs sm:text-sm px-4 py-2 rounded-xl font-semibold bg-sky-600 text-white flex items-center gap-2">
+                        <i class="fa-solid fa-code"></i> SQL Query Editor
+                    </button>
+                    <button onclick="setSqlInputMode('upload-sql')" id="mode-btn-upload-sql" class="text-xs sm:text-sm px-4 py-2 rounded-xl font-semibold bg-slate-800 text-slate-300 hover:bg-slate-750 flex items-center gap-2">
+                        <i class="fa-solid fa-file-code"></i> Upload .SQL Script
+                    </button>
+                    <button onclick="setSqlInputMode('upload-db')" id="mode-btn-upload-db" class="text-xs sm:text-sm px-4 py-2 rounded-xl font-semibold bg-slate-800 text-slate-300 hover:bg-slate-750 flex items-center gap-2">
+                        <i class="fa-solid fa-server"></i> Upload .DB / .SQLite
+                    </button>
+                    <button onclick="setSqlInputMode('upload-csv')" id="mode-btn-upload-csv" class="text-xs sm:text-sm px-4 py-2 rounded-xl font-semibold bg-slate-800 text-slate-300 hover:bg-slate-750 flex items-center gap-2">
+                        <i class="fa-solid fa-file-csv"></i> Upload CSV / Excel
+                    </button>
+                </div>
+
+                <!-- 1. SQL Query Editor Panel -->
+                <div id="panel-editor" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <!-- Database Target -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Database Target</label>
+                            <select id="db-target-select" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-sky-500">
+                                <option value="sample_patients.db" selected>Local SQLite (sample_patients.db)</option>
+                                <option value="postgres">PostgreSQL (postgresql://.../parkinsons)</option>
+                                <option value="custom">Custom SQLite / Connection String</option>
+                            </select>
+                        </div>
+                        <!-- Preset Queries Dropdown -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Load Preset Clinical SQL Query</label>
+                            <select id="preset-queries-select" onchange="applyPresetQuery(this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-sky-500">
+                                <option value="" disabled selected>-- Choose a sample clinical query --</option>
+                                <option value="SELECT * FROM patients;">1. Complete Cohort (All 50 Patients)</option>
+                                <option value="SELECT * FROM patients WHERE age >= 65;">2. Elderly Cohort (Age >= 65)</option>
+                                <option value="SELECT patient_id, mrn, patient_name, mean_f0_hz, jitter_percent, shimmer_local, hnr_db FROM patients;">3. Acoustic Phonatory Biomarkers Only</option>
+                                <option value="SELECT patient_id, mrn, patient_name, avg_velocity, avg_jerk, pressure_std, in_air_time_ratio FROM patients;">4. Digital Tablet Kinematics Only</option>
+                                <option value="SELECT patient_id, mrn, patient_name, step_cadence_spm, stride_time_variance, arm_swing_asymmetry_index FROM patients;">5. Locomotion & Gait Asymmetry Only</option>
+                                <option value="SELECT patient_id, mrn, patient_name, upsit_smell_score, rbd_sleep_flag FROM patients;">6. Non-Motor Prodromal Screenings Only</option>
+                            </select>
+                        </div>
+                        <!-- Table Quick Inspector -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Quick Inspect Table</label>
+                            <div class="flex gap-2">
+                                <select id="quick-tables-select" class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-sky-500">
+                                    <option value="patients">patients</option>
+                                </select>
+                                <button onclick="querySelectedTable()" class="px-3 py-2 bg-slate-800 hover:bg-slate-750 text-slate-200 rounded-xl text-xs font-medium border border-slate-700 transition">
+                                    Query
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Custom DSN input (hidden by default) -->
+                    <div id="custom-dsn-box" class="hidden">
+                        <label class="block text-xs font-semibold text-slate-400 mb-1.5">Custom Path or Connection String</label>
+                        <input type="text" id="custom-dsn-input" placeholder="e.g. database.db or postgresql://user:pass@localhost:5432/dbname" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-sky-500">
+                    </div>
+
+                    <!-- SQL Code Editor Box -->
+                    <div>
+                        <div class="flex items-center justify-between mb-1.5">
+                            <label class="text-xs font-semibold text-slate-400 flex items-center gap-1.5">
+                                <i class="fa-solid fa-terminal text-sky-400"></i>
+                                <span>SQL Query (Read-Only SELECT / WITH)</span>
+                            </label>
+                            <span class="text-xs text-slate-500">Supports standard SQL dialect with CTEs, JOINs, WHERE clauses</span>
+                        </div>
+                        <div class="relative">
+                            <textarea id="sql-query-editor" rows="6" spellcheck="false" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3.5 font-mono text-sm text-sky-300 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 custom-scrollbar leading-relaxed">SELECT * FROM patients LIMIT 50;</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Upload SQL Script Panel -->
+                <div id="panel-upload-sql" class="hidden space-y-4">
+                    <div class="border-2 border-dashed border-slate-700 hover:border-sky-500 rounded-2xl p-8 text-center transition cursor-pointer bg-slate-950/50" onclick="document.getElementById('sql-file-input').click()">
+                        <i class="fa-solid fa-cloud-arrow-up text-4xl text-sky-400 mb-3"></i>
+                        <p class="text-sm font-semibold text-white">Click or drag a .sql file to upload</p>
+                        <p class="text-xs text-slate-400 mt-1">Supports database dump scripts with CREATE TABLE & INSERT statements</p>
+                        <input type="file" id="sql-file-input" accept=".sql" class="hidden" onchange="handleFileUpload(this, 'sql')">
+                    </div>
+                    <div id="uploaded-sql-preview" class="hidden p-3 bg-slate-950 rounded-xl border border-slate-800 text-xs font-mono text-slate-300 max-h-32 overflow-y-auto"></div>
+                </div>
+
+                <!-- 3. Upload DB / SQLite Panel -->
+                <div id="panel-upload-db" class="hidden space-y-4">
+                    <div class="border-2 border-dashed border-slate-700 hover:border-sky-500 rounded-2xl p-8 text-center transition cursor-pointer bg-slate-950/50" onclick="document.getElementById('db-file-input').click()">
+                        <i class="fa-solid fa-database text-4xl text-sky-400 mb-3"></i>
+                        <p class="text-sm font-semibold text-white">Click or drag a .db, .sqlite, or .sqlite3 file</p>
+                        <p class="text-xs text-slate-400 mt-1">Directly queries tables and detects Parkinson's from patient records</p>
+                        <input type="file" id="db-file-input" accept=".db,.sqlite,.sqlite3" class="hidden" onchange="handleFileUpload(this, 'db')">
+                    </div>
+                    <div id="uploaded-db-info" class="hidden p-3 bg-slate-950 rounded-xl border border-slate-800 text-xs text-slate-300"></div>
+                </div>
+
+                <!-- 4. Upload CSV / Excel Panel -->
+                <div id="panel-upload-csv" class="hidden space-y-4">
+                    <div class="border-2 border-dashed border-slate-700 hover:border-sky-500 rounded-2xl p-8 text-center transition cursor-pointer bg-slate-950/50" onclick="document.getElementById('csv-file-input').click()">
+                        <i class="fa-solid fa-file-csv text-4xl text-sky-400 mb-3"></i>
+                        <p class="text-sm font-semibold text-white">Click or drag a .csv or .xlsx file</p>
+                        <p class="text-xs text-slate-400 mt-1">Automatically ingests the file into a temporary SQL table <code class="text-sky-400">patients</code> for querying</p>
+                        <input type="file" id="csv-file-input" accept=".csv,.xlsx" class="hidden" onchange="handleFileUpload(this, 'csv')">
+                    </div>
+                    <div id="uploaded-csv-info" class="hidden p-3 bg-slate-950 rounded-xl border border-slate-800 text-xs text-slate-300"></div>
+                </div>
+
+                <!-- Execution Button Bar -->
+                <div class="flex flex-wrap items-center justify-between gap-4 pt-2 border-t border-slate-800">
+                    <div class="flex items-center space-x-2 text-xs text-slate-400">
+                        <i class="fa-solid fa-shield-halved text-emerald-400"></i>
+                        <span>Auto-detects & maps column variations (UCI, Praat, MDS-UPDRS, 3NF Multimodal)</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button onclick="resetQuery()" class="px-4 py-2.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-750 text-slate-300 border border-slate-700 transition">
+                            <i class="fa-solid fa-rotate-left mr-1.5"></i> Reset
+                        </button>
+                        <button id="run-detection-btn" onclick="executeDetection()" class="px-6 py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white shadow-lg shadow-sky-500/25 transition-all flex items-center gap-2 transform active:scale-95">
+                            <i class="fa-solid fa-bolt"></i>
+                            <span>Execute SQL & Detect Parkinson's</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading Spinner State -->
+            <div id="loading-state" class="hidden py-12 text-center space-y-3">
+                <div class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-slate-700 border-t-sky-500"></div>
+                <p class="text-sm text-slate-300 font-medium">Executing SQL query and evaluating Random Forest clinical decision trees...</p>
+                <p class="text-xs text-slate-500">Normalizing acoustic, kinematic, gait, and non-motor biomarker vectors</p>
+            </div>
+
+            <!-- Error Banner -->
+            <div id="error-banner" class="hidden p-4 rounded-2xl bg-red-950/60 border border-red-800 text-red-200 text-sm flex items-start gap-3 shadow-lg">
+                <i class="fa-solid fa-triangle-exclamation text-red-400 mt-0.5 text-base"></i>
+                <div class="flex-1">
+                    <h4 class="font-bold">SQL Execution / Detection Error</h4>
+                    <p id="error-message" class="text-xs text-red-300 mt-1 font-mono"></p>
+                </div>
+            </div>
+
+            <!-- ========================================================== -->
+            <!-- PREDICTION RESULTS DASHBOARD (Populated dynamically) -->
+            <!-- ========================================================== -->
+            <div id="results-container" class="space-y-6">
+
+                <!-- 1. Executive Summary KPI Cards -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <!-- Total Screened -->
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg relative overflow-hidden">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Patients Screened</span>
+                            <div class="h-8 w-8 rounded-lg bg-sky-500/10 text-sky-400 flex items-center justify-center">
+                                <i class="fa-solid fa-users text-sm"></i>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <span id="kpi-total" class="text-3xl font-extrabold text-white font-mono">—</span>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-1">Processed from SQL query</p>
+                    </div>
+
+                    <!-- Parkinson's Detected (Positive) -->
+                    <div class="bg-slate-900 border border-red-900/40 rounded-2xl p-5 shadow-lg relative overflow-hidden bg-gradient-to-b from-slate-900 to-red-950/20">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-semibold text-red-400 uppercase tracking-wider">Parkinson's Detected</span>
+                            <div class="h-8 w-8 rounded-lg bg-red-500/10 text-red-400 flex items-center justify-center">
+                                <i class="fa-solid fa-triangle-exclamation text-sm"></i>
+                            </div>
+                        </div>
+                        <div class="mt-3 flex items-baseline gap-2">
+                            <span id="kpi-positive" class="text-3xl font-extrabold text-red-400 font-mono">—</span>
+                            <span id="kpi-positive-pct" class="text-xs font-semibold text-red-400">(--%)</span>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-1">High risk / Pathological signs</p>
+                    </div>
+
+                    <!-- Healthy Controls (Negative) -->
+                    <div class="bg-slate-900 border border-emerald-900/40 rounded-2xl p-5 shadow-lg relative overflow-hidden bg-gradient-to-b from-slate-900 to-emerald-950/20">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-semibold text-emerald-400 uppercase tracking-wider">Healthy Controls</span>
+                            <div class="h-8 w-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+                                <i class="fa-solid fa-circle-check text-sm"></i>
+                            </div>
+                        </div>
+                        <div class="mt-3 flex items-baseline gap-2">
+                            <span id="kpi-negative" class="text-3xl font-extrabold text-emerald-400 font-mono">—</span>
+                            <span id="kpi-negative-pct" class="text-xs font-semibold text-emerald-400">(--%)</span>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-1">Normal biomarker ranges</p>
+                    </div>
+
+                    <!-- Average Risk Score -->
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg relative overflow-hidden">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Cohort Mean Risk</span>
+                            <div class="h-8 w-8 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center">
+                                <i class="fa-solid fa-chart-line text-sm"></i>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <span id="kpi-mean-risk" class="text-3xl font-extrabold text-indigo-300 font-mono">—</span>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-1">Random Forest probability</p>
+                    </div>
+                </div>
+
+                <!-- 2. Visual Analytics Section -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Donut Chart: Diagnosis Ratio -->
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
+                        <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-4 flex items-center gap-2">
+                            <i class="fa-solid fa-chart-pie text-sky-400"></i> Diagnosis Proportion
+                        </h3>
+                        <div class="h-52 relative flex items-center justify-center">
+                            <canvas id="chart-ratio"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Bar Chart: Risk Distribution -->
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl lg:col-span-2">
+                        <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-4 flex items-center gap-2">
+                            <i class="fa-solid fa-chart-simple text-indigo-400"></i> Cohort Risk Distribution Brackets
+                        </h3>
+                        <div class="h-52">
+                            <canvas id="chart-distribution"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Mapped Biomarkers Pill Bar -->
+                <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 text-xs">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="font-bold text-slate-300 flex items-center gap-1.5">
+                            <i class="fa-solid fa-sitemap text-sky-400"></i> Intelligently Mapped SQL Biomarkers:
+                        </span>
+                        <span id="mapped-count-badge" class="px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/30">0 Mapped</span>
+                    </div>
+                    <div id="mapped-features-list" class="flex flex-wrap gap-2 text-slate-400">
+                        <span class="text-slate-500 italic">No query executed yet.</span>
+                    </div>
+                </div>
+
+                <!-- 4. Interactive Patient Results Table -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl shadow-xl overflow-hidden">
+                    <div class="p-5 border-b border-slate-800 sm:flex sm:items-center sm:justify-between gap-4">
+                        <div>
+                            <h3 class="text-base font-bold text-white flex items-center gap-2">
+                                <i class="fa-solid fa-list-check text-sky-400"></i>
+                                <span>Patient Diagnostic Classifications</span>
+                            </h3>
+                            <p class="text-xs text-slate-400 mt-0.5">Individual clinical interpretations based on Movement Disorder Society diagnostic thresholds</p>
+                        </div>
+
+                        <!-- Search & Filter Controls -->
+                        <div class="mt-4 sm:mt-0 flex flex-wrap items-center gap-3">
+                            <div class="relative">
+                                <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-500 text-xs"></i>
+                                <input type="text" id="patient-search-input" oninput="filterPatientsTable()" placeholder="Search patient ID, name..." class="bg-slate-950 border border-slate-700 rounded-xl pl-8 pr-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-sky-500 w-48">
+                            </div>
+
+                            <select id="patient-status-filter" onchange="filterPatientsTable()" class="bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-sky-500">
+                                <option value="all">All Patients</option>
+                                <option value="positive">🔴 Parkinson's Detected Only</option>
+                                <option value="negative">🟢 Healthy Controls Only</option>
+                            </select>
+
+                            <!-- Export CSV Button -->
+                            <button onclick="exportToCSV()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-750 text-sky-400 border border-slate-700 rounded-xl text-xs font-semibold transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-file-arrow-down"></i> Export CSV
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Table element -->
+                    <div class="overflow-x-auto custom-scrollbar">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-950/80 text-slate-400 font-semibold border-b border-slate-800 uppercase tracking-wider">
+                                <tr>
+                                    <th class="py-3 px-4">Patient / Subject</th>
+                                    <th class="py-3 px-4">Demographics</th>
+                                    <th class="py-3 px-4">Diagnostic Status</th>
+                                    <th class="py-3 px-4">Confidence / Risk</th>
+                                    <th class="py-3 px-4">Dominant Risk Driver</th>
+                                    <th class="py-3 px-4">Clinical Guidance</th>
+                                    <th class="py-3 px-4 text-right">Details</th>
+                                </tr>
+                            </thead>
+                            <tbody id="patients-table-body" class="divide-y divide-slate-800/60 text-slate-200">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Table Footer Pagination/Count -->
+                    <div class="p-4 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+                        <span id="showing-count-text">Showing 0 of 0 patients</span>
+                        <span class="text-slate-500">Threshold: $\ge$ 50% probability indicates Parkinsonian syndrome</span>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- TAB 2: SINGLE PATIENT SCREENING (Clinical Visit Calculator) -->
+        <!-- ============================================================== -->
+        <section id="single-tab" class="hidden space-y-6">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
+                <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-4">
+                    <div>
+                        <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-stethoscope text-sky-400"></i>
+                            <span>Single Patient Multimodal Clinical Screening</span>
+                        </h2>
+                        <p class="text-xs text-slate-400 mt-1">Enter individual patient assessment measurements across the four clinical screening modalities.</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="fillSinglePreset('parkinsons')" class="text-xs px-3 py-1.5 bg-red-950/40 hover:bg-red-900/60 text-red-300 font-semibold rounded-lg border border-red-800 transition">
+                            Load Parkinson's Preset
+                        </button>
+                        <button onclick="fillSinglePreset('healthy')" class="text-xs px-3 py-1.5 bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-300 font-semibold rounded-lg border border-emerald-800 transition">
+                            Load Healthy Preset
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Input Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-xs">
+                    <!-- Modality 1: Tablet Kinematics -->
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
+                        <h4 class="font-bold text-sky-400 uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fa-solid fa-pen-nib"></i> Tablet Kinematics
+                        </h4>
+                        <div>
+                            <label class="block text-slate-400 mb-1">Avg Velocity (px/ms)</label>
+                            <input type="number" step="0.01" id="single-velocity" value="1.55" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white">
+                        </div>
+                        <div>
+                            <label class="block text-slate-400 mb-1">Avg Jerk (Tremor)</label>
+                            <input type="number" step="0.01" id="single-jerk" value="0.58" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white">
+                        </div>
+                        <div>
+                            <label class="block text-slate-400 mb-1">Pressure Std Dev</label>
+                            <input type="number" step="0.01" id="single-pressure" value="0.19" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white">
+                        </div>
+                        <div>
+                            <label class="block text-slate-400 mb-1">In-Air Time Ratio (0-1)</label>
+                            <input type="number" step="0.01" id="single-in-air" value="0.24" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white">
+                        </div>
+                    </div>
+
+                    <!-- Modality 2: Voice Acoustics -->
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
+                        <h4 class="font-bold text-sky-400 uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fa-solid fa-microphone text-sky-400"></i> Voice Acoustics
+                        </h4>
+                        <div>
+                            <label class="block text-slate-400 mb-1">Mean F0 Pitch (Hz)</label>
+                            <input type="number" step="0.1" id="single-f0" value="142.0" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white">
+                        </div>
+                        <div>
+                            <label class="block text-slate-400 mb-1">Jitter Perturbation (%)</label>
+                            <input type="number" step="0.01" id="single-jitter" value="1.92" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white">
+                        </div>
+                        <div>
+                            <label class="block text-slate-400 mb-1">Shimmer Amplitude (%)</label>
+                            <input type="number" step="0.01" id="single-shimmer" value="6.85" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white">
+                        </div>
+                        <div>
+                            <label class="block text-slate-400 mb-1">HNR (dB)</label>
+                            <input type="number" step="0.1" id="single-hnr" value="12.8" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white">
+                        </div>
+                    </div>
+
+                    <!-- Modality 3: Gait & Mobility -->
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
+                        <h4 class="font-bold text-sky-400 uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fa-solid fa-person-walking text-sky-400"></i> Gait & Mobility
+                        </h4>
+                        <div>
+                            <label class="block text-slate-400 mb-1">Cadence (steps/min)</label>
+                            <input type="number" step="0.1" id="single-cadence" value="91.0" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white">
+                        </div>
+                        <div>
+                            <label class="block text-slate-400 mb-1">Stride Time Variance</label>
+                            <input type="number" step="0.001" id="single-stride-var" value="0.058" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white">
+                        </div>
+                        <div>
+                            <label class="block text-slate-400 mb-1">Arm Swing Asymmetry</label>
+                            <input type="number" step="0.01" id="single-arm-asym" value="0.38" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white">
+                        </div>
+                    </div>
+
+                    <!-- Modality 4: Non-Motor Screenings -->
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
+                        <h4 class="font-bold text-sky-400 uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fa-solid fa-notes-medical text-sky-400"></i> Non-Motor Screenings
+                        </h4>
+                        <div>
+                            <label class="block text-slate-400 mb-1">UPSIT Smell Score (0-40)</label>
+                            <input type="number" step="1" id="single-upsit" value="17" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white">
+                        </div>
+                        <div>
+                            <label class="block text-slate-400 mb-1">REM Sleep Disorder (RBD)</label>
+                            <select id="single-rbd" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white">
+                                <option value="1" selected>Positive (Diagnosed RBD)</option>
+                                <option value="0">Negative (Normal Sleep)</option>
+                            </select>
+                        </div>
+                        <div class="pt-4">
+                            <button onclick="calculateSinglePatient()" class="w-full py-2.5 bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-lg transition shadow-lg shadow-sky-600/30">
+                                Run Single Screening
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Single Prediction Output Card -->
+                <div id="single-result-box" class="p-6 bg-slate-950 border border-slate-800 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div class="space-y-1 text-center md:text-left">
+                        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Screening Decision</span>
+                        <h3 id="single-res-title" class="text-2xl font-extrabold text-red-400">Parkinson's Detected</h3>
+                        <p id="single-res-desc" class="text-xs text-slate-400 max-w-xl">High risk of Parkinsonian syndrome. Marked tremor and phonatory deviations detected.</p>
+                    </div>
+                    <div class="text-center md:text-right">
+                        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Probability Score</span>
+                        <div id="single-res-score" class="text-3xl font-black text-white font-mono">99.4%</div>
+                        <span id="single-res-badge" class="inline-block mt-1 text-xs px-2.5 py-0.5 rounded-full bg-red-500/10 text-red-400 border border-red-500/30">High Severity</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- TAB 3: DATABASE EXPLORER -->
+        <!-- ============================================================== -->
+        <section id="db-tab" class="hidden space-y-6">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
+                <div>
+                    <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-server text-sky-400"></i>
+                        <span>Relational Schema & Table Inspector</span>
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-1">Inspect relational tables in the active database engine (SQLite / PostgreSQL).</p>
+                </div>
+
+                <div id="db-tables-grid" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Populated via API -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Biomarkers Detail Modal -->
+    <div id="biomarker-modal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-2xl w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h3 id="modal-patient-title" class="text-base font-bold text-white">Patient Biomarker Breakdown</h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-white text-lg">&times;</button>
+            </div>
+            <div id="modal-biomarkers-content" class="max-h-96 overflow-y-auto custom-scrollbar text-xs font-mono space-y-2">
+                <!-- Populated dynamically -->
+            </div>
+            <div class="border-t border-slate-800 pt-3 text-right">
+                <button onclick="closeModal()" class="px-4 py-1.5 bg-slate-800 hover:bg-slate-750 text-white rounded-xl text-xs font-semibold">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application JavaScript Logic -->
+    <script>
+        let currentRecords = [];
+        let ratioChartInstance = null;
+        let distributionChartInstance = null;
+
+        // Tab Switching
+        function switchTab(tabId) {
+            document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
+            document.getElementById(tabId).classList.remove('hidden');
+
+            document.querySelectorAll('nav button').forEach(btn => {
+                btn.classList.remove('bg-sky-600', 'text-white');
+                btn.classList.add('text-slate-400');
+            });
+
+            if (tabId === 'sql-tab') {
+                document.getElementById('tab-btn-sql').classList.add('bg-sky-600', 'text-white');
+                document.getElementById('tab-btn-sql').classList.remove('text-slate-400');
+            } else if (tabId === 'single-tab') {
+                document.getElementById('tab-btn-single').classList.add('bg-sky-600', 'text-white');
+                document.getElementById('tab-btn-single').classList.remove('text-slate-400');
+            } else if (tabId === 'db-tab') {
+                document.getElementById('tab-btn-db').classList.add('bg-sky-600', 'text-white');
+                document.getElementById('tab-btn-db').classList.remove('text-slate-400');
+                fetchTables();
+            }
+        }
+
+        // Mode Switching
+        function setSqlInputMode(mode) {
+            ['editor', 'upload-sql', 'upload-db', 'upload-csv'].forEach(m => {
+                const panel = document.getElementById(`panel-${m}`);
+                const btn = document.getElementById(`mode-btn-${m}`);
+                if (m === mode) {
+                    panel.classList.remove('hidden');
+                    btn.classList.remove('bg-slate-800', 'text-slate-300');
+                    btn.classList.add('bg-sky-600', 'text-white');
+                } else {
+                    panel.classList.add('hidden');
+                    btn.classList.remove('bg-sky-600', 'text-white');
+                    btn.classList.add('bg-slate-800', 'text-slate-300');
+                }
+            });
+        }
+
+        // Apply Preset Queries
+        function applyPresetQuery(query) {
+            if (query) {
+                document.getElementById('sql-query-editor').value = query;
+            }
+        }
+
+        function querySelectedTable() {
+            const table = document.getElementById('quick-tables-select').value;
+            document.getElementById('sql-query-editor').value = `SELECT * FROM ${table} LIMIT 100;`;
+            executeDetection();
+        }
+
+        function loadSamplePreset(type) {
+            if (type === 'multimodal') {
+                document.getElementById('db-target-select').value = 'sample_patients.db';
+                document.getElementById('sql-query-editor').value = 'SELECT * FROM patients LIMIT 50;';
+                setSqlInputMode('editor');
+                executeDetection();
+            } else if (type === 'uci') {
+                fetch('/api/sample/uci-sql')
+                    .then(res => res.json())
+                    .then(data => {
+                        document.getElementById('db-target-select').value = ':memory:';
+                        setSqlInputMode('editor');
+                        document.getElementById('sql-query-editor').value = 'SELECT * FROM uci_voice_patients;';
+                        executeDetectionScript(data.sql);
+                    })
+                    .catch(err => console.error(err));
+            }
+        }
+
+        function resetQuery() {
+            document.getElementById('sql-query-editor').value = 'SELECT * FROM patients LIMIT 50;';
+        }
+
+        // File Upload Handler
+        function handleFileUpload(input, type) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('file_type', type);
+
+            document.getElementById('loading-state').classList.remove('hidden');
+            document.getElementById('error-banner').classList.add('hidden');
+
+            fetch('/api/sql/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('loading-state').classList.add('hidden');
+                if (data.error) {
+                    showError(data.error);
+                } else {
+                    renderResults(data);
+                }
+            })
+            .catch(err => {
+                document.getElementById('loading-state').classList.add('hidden');
+                showError(err.message);
+            });
+        }
+
+        function executeDetectionScript(sqlScript) {
+            document.getElementById('loading-state').classList.remove('hidden');
+            document.getElementById('error-banner').classList.add('hidden');
+
+            fetch('/api/sql/execute-script', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ script: sqlScript })
+            })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('loading-state').classList.add('hidden');
+                if (data.error) {
+                    showError(data.error);
+                } else {
+                    renderResults(data);
+                }
+            })
+            .catch(err => {
+                document.getElementById('loading-state').classList.add('hidden');
+                showError(err.message);
+            });
+        }
+
+        // Execute Detection via SQL Editor
+        function executeDetection() {
+            const query = document.getElementById('sql-query-editor').value.trim();
+            const dbTarget = document.getElementById('db-target-select').value;
+            const customDsn = document.getElementById('custom-dsn-input').value.trim();
+
+            if (!query) {
+                showError("Please enter a SQL query.");
+                return;
+            }
+
+            document.getElementById('loading-state').classList.remove('hidden');
+            document.getElementById('error-banner').classList.add('hidden');
+
+            fetch('/api/sql/query', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    query: query,
+                    db_target: dbTarget,
+                    custom_dsn: customDsn
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('loading-state').classList.add('hidden');
+                if (data.error) {
+                    showError(data.error);
+                } else {
+                    renderResults(data);
+                }
+            })
+            .catch(err => {
+                document.getElementById('loading-state').classList.add('hidden');
+                showError(err.message);
+            });
+        }
+
+        function showError(msg) {
+            document.getElementById('error-message').textContent = msg;
+            document.getElementById('error-banner').classList.remove('hidden');
+        }
+
+        // Render Results Dashboard
+        function renderResults(data) {
+            currentRecords = data.records || [];
+
+            // Update KPIs
+            document.getElementById('kpi-total').textContent = data.total_patients;
+            document.getElementById('kpi-positive').textContent = data.positive_count;
+            document.getElementById('kpi-positive-pct').textContent = `(${data.positive_rate_pct}%)`;
+            document.getElementById('kpi-negative').textContent = data.negative_count;
+            const negPct = (100 - data.positive_rate_pct).toFixed(1);
+            document.getElementById('kpi-negative-pct').textContent = `(${negPct}%)`;
+            document.getElementById('kpi-mean-risk').textContent = `${(data.avg_probability * 100).toFixed(1)}%`;
+
+            // Mapped features list
+            document.getElementById('mapped-count-badge').textContent = `${data.mapped_features.length} / 13 Mapped`;
+            const mappedListEl = document.getElementById('mapped-features-list');
+            if (data.mapped_features.length > 0) {
+                mappedListEl.innerHTML = data.mapped_features.map(f => `
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700 text-slate-300">
+                        <strong class="text-sky-400 mr-1">${f.standard_feature}</strong>
+                        <span class="text-slate-500">← ${f.source_column} (${f.modality})</span>
+                    </span>
+                `).join('');
+            } else {
+                mappedListEl.innerHTML = '<span class="text-amber-400">Warning: No standard Parkinson biomarkers identified in query columns.</span>';
+            }
+
+            // Charts Rendering
+            renderCharts(data);
+
+            // Table Rendering
+            filterPatientsTable();
+        }
+
+        function renderCharts(data) {
+            // 1. Ratio Donut Chart
+            const ctxRatio = document.getElementById('chart-ratio').getContext('2d');
+            if (ratioChartInstance) ratioChartInstance.destroy();
+            ratioChartInstance = new Chart(ctxRatio, {
+                type: 'doughnut',
+                data: {
+                    labels: ["Parkinson's Detected", 'Healthy Controls'],
+                    datasets: [{
+                        data: [data.positive_count, data.negative_count],
+                        backgroundColor: ['#ef4444', '#10b981'],
+                        borderColor: '#0f172a',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 11 } } }
+                    }
+                }
+            });
+
+            // 2. Risk Distribution Bar Chart
+            const ctxDist = document.getElementById('chart-distribution').getContext('2d');
+            if (distributionChartInstance) distributionChartInstance.destroy();
+            const distLabels = Object.keys(data.risk_distribution || {});
+            const distValues = Object.values(data.risk_distribution || {});
+            distributionChartInstance = new Chart(ctxDist, {
+                type: 'bar',
+                data: {
+                    labels: distLabels,
+                    datasets: [{
+                        label: 'Patient Count',
+                        data: distValues,
+                        backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#f97316', '#ef4444'],
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { display: false } },
+                        y: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { color: '#1e293b' } }
+                    }
+                }
+            });
+        }
+
+        function filterPatientsTable() {
+            const query = (document.getElementById('patient-search-input').value || '').toLowerCase();
+            const filter = document.getElementById('patient-status-filter').value;
+
+            const filtered = currentRecords.filter(r => {
+                const matchesQuery = r.patient_id.toLowerCase().includes(query) || (r.name && r.name.toLowerCase().includes(query));
+                if (!matchesQuery) return false;
+                if (filter === 'positive') return r.is_positive;
+                if (filter === 'negative') return !r.is_positive;
+                return true;
+            });
+
+            const tbody = document.getElementById('patients-table-body');
+            document.getElementById('showing-count-text').textContent = `Showing ${filtered.length} of ${currentRecords.length} patients`;
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-slate-500">No matching patient records found.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(r => {
+                const badgeColor = r.is_positive ? 'bg-red-500/10 text-red-400 border-red-500/30' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
+                const statusDot = r.is_positive ? 'bg-red-400' : 'bg-emerald-400';
+                const barColor = r.is_positive ? 'bg-red-500' : 'bg-emerald-500';
+
+                return `
+                    <tr class="hover:bg-slate-800/40 transition">
+                        <td class="py-3 px-4 font-mono font-semibold text-white">
+                            <div>${r.patient_id}</div>
+                            <div class="text-[11px] text-slate-500 font-sans">${r.name}</div>
+                        </td>
+                        <td class="py-3 px-4 text-slate-300">
+                            <div>${r.age ? r.age + ' yrs' : '—'}</div>
+                            <div class="text-[11px] text-slate-500 capitalize">${r.gender || '—'}</div>
+                        </td>
+                        <td class="py-3 px-4">
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ${badgeColor}">
+                                <span class="w-1.5 h-1.5 rounded-full ${statusDot} mr-1.5"></span>
+                                ${r.prediction === 'Positive' ? "Parkinson's Detected" : "Healthy Control"}
+                            </span>
+                        </td>
+                        <td class="py-3 px-4">
+                            <div class="flex items-center justify-between text-xs font-mono font-bold mb-1">
+                                <span>${(r.probability * 100).toFixed(1)}%</span>
+                                <span class="text-[10px] text-slate-500">${r.severity_badge}</span>
+                            </div>
+                            <div class="w-24 bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                                <div class="${barColor} h-full rounded-full" style="width: ${(r.probability * 100).toFixed(0)}%"></div>
+                            </div>
+                        </td>
+                        <td class="py-3 px-4 text-slate-300 font-medium">
+                            ${r.dominant_modality}
+                        </td>
+                        <td class="py-3 px-4 text-slate-400 text-[11px] max-w-xs truncate" title="${r.clinical_interpretation}">
+                            ${r.clinical_interpretation}
+                        </td>
+                        <td class="py-3 px-4 text-right">
+                            <button onclick='viewDetails(${JSON.stringify(r)})' class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-sky-400 rounded-lg text-xs font-semibold transition">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function viewDetails(patient) {
+            document.getElementById('modal-patient-title').textContent = `${patient.patient_id} - ${patient.name} (${patient.prediction})`;
+            const content = document.getElementById('modal-biomarkers-content');
+            
+            let html = `
+                <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 mb-3 space-y-1">
+                    <div class="text-slate-300"><strong>Diagnostic Status:</strong> <span class="${patient.is_positive ? 'text-red-400 font-bold' : 'text-emerald-400 font-bold'}">${patient.prediction}</span></div>
+                    <div class="text-slate-300"><strong>Probability:</strong> ${(patient.probability * 100).toFixed(1)}% (Severity: ${patient.severity_badge})</div>
+                    <div class="text-slate-400 text-xs"><strong>Recommendation:</strong> ${patient.clinical_interpretation}</div>
+                </div>
+                <h4 class="text-sky-400 font-bold uppercase tracking-wider text-xs">Extracted Biomarker Features:</h4>
+                <div class="grid grid-cols-2 gap-2 mt-2">
+            `;
+
+            for (const [key, val] of Object.entries(patient.raw_features || {})) {
+                html += `
+                    <div class="bg-slate-900 p-2 rounded-lg border border-slate-800 flex justify-between">
+                        <span class="text-slate-400">${key}:</span>
+                        <span class="text-white font-bold">${val !== null ? val : '—'}</span>
+                    </div>
+                `;
+            }
+
+            html += `</div>`;
+            content.innerHTML = html;
+            document.getElementById('biomarker-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('biomarker-modal').classList.add('hidden');
+        }
+
+        function exportToCSV() {
+            if (currentRecords.length === 0) return;
+            const headers = ["patient_id", "name", "age", "gender", "prediction", "probability", "severity_badge", "dominant_modality", "clinical_interpretation"];
+            const rows = currentRecords.map(r => [
+                r.patient_id,
+                `"${r.name}"`,
+                r.age || "",
+                r.gender || "",
+                r.prediction,
+                r.probability,
+                r.severity_badge,
+                `"${r.dominant_modality}"`,
+                `"${r.clinical_interpretation}"`
+            ]);
+
+            const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "parkinsons_sql_predictions.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Single Patient Logic
+        function fillSinglePreset(type) {
+            if (type === 'parkinsons') {
+                document.getElementById('single-velocity').value = "1.45";
+                document.getElementById('single-jerk').value = "0.62";
+                document.getElementById('single-pressure').value = "0.22";
+                document.getElementById('single-in-air').value = "0.26";
+                document.getElementById('single-f0').value = "138.0";
+                document.getElementById('single-jitter').value = "2.10";
+                document.getElementById('single-shimmer').value = "7.20";
+                document.getElementById('single-hnr').value = "11.5";
+                document.getElementById('single-cadence').value = "88.0";
+                document.getElementById('single-stride-var').value = "0.062";
+                document.getElementById('single-arm-asym').value = "0.42";
+                document.getElementById('single-upsit').value = "15";
+                document.getElementById('single-rbd').value = "1";
+            } else {
+                document.getElementById('single-velocity').value = "2.80";
+                document.getElementById('single-jerk').value = "0.15";
+                document.getElementById('single-pressure').value = "0.04";
+                document.getElementById('single-in-air').value = "0.04";
+                document.getElementById('single-f0').value = "155.0";
+                document.getElementById('single-jitter').value = "0.40";
+                document.getElementById('single-shimmer').value = "2.30";
+                document.getElementById('single-hnr').value = "24.0";
+                document.getElementById('single-cadence').value = "115.0";
+                document.getElementById('single-stride-var').value = "0.015";
+                document.getElementById('single-arm-asym').value = "0.05";
+                document.getElementById('single-upsit').value = "36";
+                document.getElementById('single-rbd').value = "0";
+            }
+            calculateSinglePatient();
+        }
+
+        function calculateSinglePatient() {
+            const payload = {
+                avg_velocity: parseFloat(document.getElementById('single-velocity').value),
+                avg_jerk: parseFloat(document.getElementById('single-jerk').value),
+                pressure_std: parseFloat(document.getElementById('single-pressure').value),
+                in_air_time_ratio: parseFloat(document.getElementById('single-in-air').value),
+                mean_f0_hz: parseFloat(document.getElementById('single-f0').value),
+                jitter_percent: parseFloat(document.getElementById('single-jitter').value),
+                shimmer_local: parseFloat(document.getElementById('single-shimmer').value),
+                hnr_db: parseFloat(document.getElementById('single-hnr').value),
+                step_cadence_spm: parseFloat(document.getElementById('single-cadence').value),
+                stride_time_variance: parseFloat(document.getElementById('single-stride-var').value),
+                arm_swing_asymmetry_index: parseFloat(document.getElementById('single-arm-asym').value),
+                upsit_smell_score: parseFloat(document.getElementById('single-upsit').value),
+                rbd_sleep_flag: document.getElementById('single-rbd').value === "1"
+            };
+
+            fetch('/predict/multimodal', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(data => {
+                const isPos = data.predicted_label === 'parkinsons';
+                const titleEl = document.getElementById('single-res-title');
+                const descEl = document.getElementById('single-res-desc');
+                const scoreEl = document.getElementById('single-res-score');
+                const badgeEl = document.getElementById('single-res-badge');
+
+                titleEl.textContent = isPos ? "Parkinson's Detected" : "Healthy Control";
+                titleEl.className = isPos ? "text-2xl font-extrabold text-red-400" : "text-2xl font-extrabold text-emerald-400";
+                descEl.textContent = data.clinical_interpretation;
+                scoreEl.textContent = `${(data.probability_score * 100).toFixed(1)}%`;
+                badgeEl.textContent = isPos ? "Pathological Markers Detected" : "Normal Physiological Limits";
+                badgeEl.className = isPos ? "inline-block mt-1 text-xs px-2.5 py-0.5 rounded-full bg-red-500/10 text-red-400 border border-red-500/30" : "inline-block mt-1 text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30";
+            })
+            .catch(err => console.error(err));
+        }
+
+        // Fetch DB Tables
+        function fetchTables() {
+            fetch('/api/sql/tables')
+                .then(res => res.json())
+                .then(data => {
+                    const grid = document.getElementById('db-tables-grid');
+                    grid.innerHTML = (data.tables || []).map(t => `
+                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-white font-mono">${t.table_name}</span>
+                                <span class="px-2 py-0.5 rounded-full bg-slate-800 text-sky-400 text-xs">${t.rows} rows</span>
+                            </div>
+                            <p class="text-xs text-slate-500">Queryable via SQL SELECT statements</p>
+                            <button onclick="setQueryTable('${t.table_name}')" class="text-xs text-sky-400 hover:text-sky-300 font-semibold flex items-center gap-1">
+                                Query This Table <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                            </button>
+                        </div>
+                    `).join('');
+                });
+        }
+
+        function setQueryTable(tableName) {
+            switchTab('sql-tab');
+            document.getElementById('sql-query-editor').value = `SELECT * FROM ${tableName} LIMIT 50;`;
+            executeDetection();
+        }
+
+        // Initialize with default sample query on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            executeDetection();
+        });
+    </script>
+</body>
+</html>
+
